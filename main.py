@@ -31,39 +31,42 @@ player_surface = pygame.image.load("graphics/player/player_walk_1.png").convert_
 player_rect = player_surface.get_rect(midbottom = (100, 100))
 
 player_stand_surface = pygame.image.load("graphics/player/player_stand.png")
-player_stand_scaled = pygame.transform.scale(player_stand_surface, (200, 250))
-player_stand_rect = player_stand_scaled.get_rect(midbottom = (350, 350))
+player_stand = pygame.transform.rotozoom(player_stand_surface, 15, 3)
+player_stand_rect = player_stand.get_rect(midbottom = (350, 350))
 
 snail_stand_surface = pygame.image.load("graphics/snail/snail1.png")
-snail_stand_scaled = pygame.transform.scale(snail_stand_surface, (200, 100))
-snail_stand_rect = snail_stand_scaled.get_rect(midbottom = (450, 350))
+snail_stand = pygame.transform.scale(snail_stand_surface, (200, 100))
+snail_stand_rect = snail_stand.get_rect(midbottom = (475, player_stand_rect.bottom))
+
+obstacle_timer = pygame.USEREVENT + 1
+pygame.time.set_timer(obstacle_timer, 900)
 
 while True: 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                if game_active and player_rect.bottom == 300:
+        if game_active:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    if game_active and player_rect.bottom == 300:
+                        player_gravity = -20
+                    if not game_active:
+                        start_time = pygame.time.get_ticks()
+                        snail_rect.left = 700
+                        game_active = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if player_rect.collidepoint(event.pos) and player_rect.bottom == 300:
                     player_gravity = -20
-                if not game_active:
-                    start_time = pygame.time.get_ticks()
-                    snail_rect.left = 700
-                    game_active = True
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if player_rect.collidepoint(event.pos) and player_rect.bottom == 300:
-                player_gravity = -20
+            if event.type == obstacle_timer:
+                print('test')
 
     if game_active:
         screen.blit(sky_surface, (0, 0))
         screen.blit(ground_surface, (0, 300))
 
         display_score()
-        # pygame.draw.rect(screen, '#c0e8ec', text_rect)
-        # pygame.draw.rect(screen, '#c0e8ec', text_rect, 20)
-        # screen.blit(text_surface, text_rect)
 
         screen.blit(snail_surface, snail_rect)
         if snail_rect.right <= 0:
@@ -82,8 +85,10 @@ while True:
         endtext_rect = endtext_surface.get_rect(center = (400, 50))
         screen.fill((94, 129, 162))
         screen.blit(endtext_surface, endtext_rect)
-        screen.blit(player_stand_scaled, player_stand_rect)
-        screen.blit(snail_stand_scaled, snail_stand_rect)
+        screen.blit(player_stand, player_stand_rect)
+        screen.blit(snail_stand, snail_stand_rect)
+
+
 
     pygame.display.update()
     clock.tick(60)
